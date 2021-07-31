@@ -1,73 +1,146 @@
-import numpy as np
-import copy
+## RC4 - chaves de 128 bits
 
-## rc4 tamanho da chave de 128 bits
+###########################
+# Entradas - Texto e chave
+plain_text = input("Entre com o texto a ser cifrado: ")
+key = input("Entre com a chave K: ")
 
-vetor_s = np.array([])
-vetor_s = list(range(0,256)) ##criando o vetor S
-vetor_t = np.array([])
-vetor_t = list(range(0,256))
-chave_k = input("entre com a chave ")
-text = input("entre com o texto a ser cifrado ")
-valor = np.array([])
-valor = list(range(0,len(text)))
-cripto_saida = np.array([])
-cripto_saida = list(range(0,256))
-i=0
-for i in range(len(text)):
-    valor[i] = ord(text[i])
-    i=i+1;
-
-#print(valor)
-#print(chave_k)
-
-if(len(chave_k)>128):
-    print("tamanho da chave deve ser < 128bits")
+# ------------------------------------
+# Verificar se a chave é menor ou igual a 128 bits (128/8)
+if (len(key) > 16):
+    print("O comprimento da chave não pode ser superior a 128 bits")
     exit()
-i=0
-k=0 
 
-while (i < len(vetor_s)): ###atribuição do vetor T em relação a chave
-    
-    if (k == len(chave_k)):
-            k = 0
 
-    vetor_t[i] = ord(chave_k[k])
-    k = k+1
-    i = i+1
+###########################
+# ENCRIPTANDO
+print("\n###########################")
+print("ENCRIPTANDO\n")
 
-######################## primeira permutação do vetor S
+# ------------------------------------
+# Imprimindo texto simples
+print(f"Texto Simples: {plain_text}")
 
-i=0
-j=0
+# Imprimindo chave
+print(f"Chave K: {key}")
 
-for i in  range(256):
-    j = (j+vetor_s[i]+ vetor_t[i]) % 256
+# ------------------------------------
+# Declaração - Vetor para armazenar a conversão do texto simples em ASCII e encriptado
+text_in_asc = [i for i in range(0, len(plain_text))]
 
-    vetor_s[i],vetor_s[j] = vetor_s[j],vetor_s[i]
+# ------------------------------------
+# Declaração - Vetor para armazenar o texto encriptado
+chipher_text = [i for i in range(0, len(plain_text))]
 
-############## gerar novo fluxo aleatorio no vetor S
-i=0
-j=0
+# ------------------------------------
+# Convertendo o texto simples na forma de ASCII
+for i in range(0, len(plain_text)):
+    text_in_asc[i] = ord(plain_text[i])
 
-for i in  range(256):
-    i = (i+1) % 256
-    j = (j + vetor_s[i]) % 256
-    vetor_s[i],vetor_s[j] = vetor_s[j],vetor_s[i]
-    auxcrip = (vetor_s[i]+vetor_s[j]) % 256
+# ------------------------------------
+# Imprimindo texto em ASCII
+print(f"Texto em ASCII: {text_in_asc}\n")
 
-    cripto_saida[i] = vetor_s[auxcrip]
 
-i=0
+###########################
+## INICIALIZANDO S e T
 
-for i in range(len(text)):    
-    valor[i] = valor[i] ^ cripto_saida[i]
+# Declaração - Vetor - S é preenchido com os valores de 0 a 255
+S = [i for i in range(0, 256)]    # Criando o vetor de estado de 256 bytes
+print(f"S: {S}")
 
-print(valor)
+# Declaração - Vetor - T
+    # Se o comprimento da chave k é de 256 bytes, então k é atribuído a T.
+    # Caso contrário, para uma chave com comprimento (k-len) bytes, os primeiros k-len
+    # elementos de T são copiados de K e, em seguida, K é repetido como quantas vezes
+    # forem necessárias para preencher T.
+T = [0 for i in range(0, 256)]  # Criando o vetor temporário t
 
-saidadecripitada = []
+k = 0
+for i in range(0, 256):
 
-for i in range(len(text)):    
-    valor[i] = valor[i] ^ cripto_saida[i]
-    saidadecripitada.append(chr(valor[i]))
-print(saidadecripitada)
+    if (k == len(key)):
+        k = 0
+
+    # Atribuição do vetor T em relação a chave
+    T[i] = ord(key[k])
+
+    k = k + 1
+
+print(f"T: {T}")
+
+
+###########################
+## ALGORITMO KSA
+print("\nAlgoritmo KSA")
+
+# Primeira permutação do vetor S
+    # Usamos T para produzir a permutação inicial de S. Começando com S [0] para S [255],
+    # e para cada algoritmo S [i] trocá-lo por outro byte em S de acordo com um esquema
+    # ditado por T [i], mas S ainda conterá valores de 0 a 255.
+
+j = 0
+for i in range(0, 256):
+    j = (j + S[i] + T[i]) % 256
+    S[i], S[j] = S[j], S[i]
+
+    print(f"{i} {S}")
+
+print(f"\nA matriz de permutação inicial é: {S}")
+
+
+###########################
+## ALGORITMO DE GERAÇÃO PSEUDOALEATÓRIA
+print("\nAlgoritmo PRGA:")
+
+# Gerar novo fluxo aleatorio no vetor S
+    # Uma vez que o vetor S é inicializado, a chave de entrada não será usada.
+    # Nesta etapa, para cada algoritmo S [i], troque-o por outro byte em S de acordo
+    # com um esquema ditado pela configuração atual de S. Após atingir S [255] o processo continua,
+    # começando de S [0] novamente
+key_stream = [i for i in range(0, 256)] # Criando vetor key_stream
+
+j = 0
+for i in range(0, 256):
+    print(f"{i} {S}")
+
+    i = (i + 1) % 256
+    j = (j + S[i]) % 256
+    S[i], S[j] = S[j], S[i]
+
+    t = (S[i] + S[j]) % 256
+    key_stream[i] = S[t]
+
+
+print(f"\nFluxo de chave: {key_stream}")
+
+###########################
+## ENCRIPTANDO
+    # Faça o XOR do valor k com o próximo byte do texto claro.
+    # Este keystream agora é XOR com o texto simples, este XORing é feito byte a byte para
+    # produzir o texto criptografado.
+for i in range(len(text_in_asc)):
+    chipher_text[i] = text_in_asc[i] ^ key_stream[i]
+
+print(f"\nTexto encriptado com RS4: {chipher_text}")
+
+text_encrypt = [chr(i) for i in chipher_text]
+text_encrypt = ''.join(text_encrypt)
+print(f"Texto encriptado: {text_encrypt}\n")
+
+
+###########################
+## DESCRIPTANDO
+
+# Para decriptar, faça o XOR do valor k com o próximo byte do texto cifrado
+
+plain_text_decrypt = []
+
+for i in range(len(plain_text)):
+    chipher_text[i] = chipher_text[i] ^ key_stream[i]
+    plain_text_decrypt.append(chr(chipher_text[i]))
+
+print(f"Texto descriptado - Lista: {plain_text_decrypt}")
+
+plain_text_decrypt = "".join(plain_text_decrypt)
+print(f"Texto descriptado: {plain_text_decrypt}")
