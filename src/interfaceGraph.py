@@ -10,7 +10,7 @@ class Tela:
             [sg.T(' '  * 50)],
             [sg.Text("Texto", size = (9,0), font=("Helvetica", 12, 'bold')), sg.Multiline(key='texto', size=(70, 10), font=("Helvetica", 12), no_scrollbar=True)],
             [sg.Text("Chave", size = (9,0), font=("Helvetica", 12, 'bold')), sg.Multiline(key='chave', size=(70, 2), font=("Helvetica", 12) , no_scrollbar=True)],
-            [sg.T(' '  * 50) ,sg.Button("Encriptar", key ="Encriptar",size = (10,0), font=("Helvetica", 12, 'bold')), sg.Button("Decriptar", size = (10,0), font=("Helvetica", 12, 'bold'))],
+            [sg.T(' '  * 50) ,sg.Button("Encriptar", key ="Encriptar",size = (10,0), font=("Helvetica", 12, 'bold')), sg.Button("Decriptar", key ="Decriptar",size = (10,0), font=("Helvetica", 12, 'bold'))],
             [sg.Text("Resultado", size = (9,0), font=("Helvetica", 12, 'bold')), sg.Output(key = 'Resultado', size=(70, 10), font=("Helvetica", 12))]
         ]
         # Janela
@@ -22,17 +22,60 @@ class Tela:
             # Extrair os dados da tela
             self.button, self.values = self.janela.Read()
 
-            text = self.values['texto']
-            key = self.values['chave']
-
             if self.button == sg.WINDOW_CLOSED:
                 break
 
             if self.button == "Encriptar":
-                print("OLA")
+                # Limpar a tela
+                self.janela.FindElement('Resultado').Update('')
+
+                # Recebendo valor do texto escrito
+                text_aux = self.values['texto']
+                text = text_aux[:-1] # Removendo o '\n'
+
+                # Recebendo valor da chave
+                key_aux = self.values['chave']
+                key = key_aux[:-1] # Removendo o '\n'
+
+                # print(f"Tipo: {type(text)} e texto: {text} ")
+                rc4 = RC4Encrypt(text, key)
+                cipher_text = rc4.encrypt()
+
+                cipher_list = str(cipher_text)  # Transforma para string
+                cipher_string = cipher_list[2:len(cipher_list) - 2:1]  # Retira os ['']
+
+                # Imprimir resultado - Texto encriptado
+                print(cipher_string, end='')
+
+            if self.button == "Decriptar":
+                # Limpar a tela
+                self.janela.FindElement('Resultado').Update('')
+
+                # Recebendo valor do texto escrito
+                text_aux = self.values['texto']
+                text = text_aux[:-1]  # Removendo o '\n'
+
+                # Recebendo valor da chave
+                key_aux = self.values['chave']
+                key = key_aux[:-1]  # Removendo o '\n'
+
+                print(f"Decifrar: {text} com chave: {key}")
+
+                rc4 = RC4Decrypt(f"{text}", f"{key}")
+                plain_text = rc4.decrypt()
+
+                # Imprimir resultado - Texto encriptado
+                print(plain_text, end='')
 
 
 
+# rc4 = RC4Encrypt('Matheus', 'Rebeca')
+# cipher_text = rc4.encrypt()
+# print(cipher_text)
+#
+# rc4 = RC4Decrypt('\x8fªÞ{V\x16m', 'Rebeca')
+# plain_text = rc4.decrypt()
+# print(plain_text)
 
 
 tela = Tela()

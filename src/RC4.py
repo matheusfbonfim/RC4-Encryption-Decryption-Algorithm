@@ -1,3 +1,5 @@
+import base64
+
 class RC4:
     def __init__(self):
         pass
@@ -8,6 +10,16 @@ class RC4:
         if (len(key) > 16):
             print("O comprimento da chave não pode ser superior a 128 bits")
             exit()
+
+    # ------------------------------------
+    # Encode - String para Hexa
+    def b64e(self, s):
+        return base64.b64encode(s.encode()).decode()
+
+    # ------------------------------------
+    # Decode - Hex para string
+    def b64d(self, s):
+        return base64.b64decode(s).decode()
 
     ## ------------------------------------
     # Conversão do texto simples ou chave em ASCII
@@ -44,7 +56,7 @@ class RC4:
                 k = 0
 
             # Atribuição do vetor T em relação a chave
-            T[i] = ord(key[k])
+            T[i] = (key[k])
 
             k = k + 1
 
@@ -99,7 +111,7 @@ class RC4:
 
     ## ------------------------------------
     ## XOR - Entre um plain_text / chipher_text e key_stream
-    def XOR(self, text , key_stream):
+    def XOR(self, text, key_stream):
         result = [i for i in range(0, len(text))]
 
         for i in range(len(text)):
@@ -107,26 +119,28 @@ class RC4:
 
         return result
 
-    def encrypt_ascii(self, cipher_text):
-        text_encrypt = [chr(i) for i in cipher_text]
+    ## ------------------------------------
+    ## Convertendo o texto decifrado em ascii para char
+    def convert_ascii_in_string(self, text):
+        text_encrypt = [chr(i) for i in text]
         text_encrypt = ''.join(text_encrypt)
 
         return text_encrypt
 
     ## ------------------------------------
+    ## Criando arquivo com o texto cifrado
     def cria_arquivo_texto_cifrado(self, cipher_text):
         arquivo = open("text_cipher.txt", "w")
-        arquivo.write(cipher_text)
+        arquivo.write(str(cipher_text))
         arquivo.close()
 
     ## ------------------------------------
+    ## Leitura do arquivo com o texto cifrado
     def ler_arquivo_texto_cifrado(self):
         arquivo = open('text_cipher.txt', 'r')
         texto = arquivo.readlines()
-
+        arquivo.close()
         return texto
-
-
 
 
 
@@ -139,10 +153,13 @@ class RC4Encrypt(RC4):
         self.text_in_asc = None
         self.key_stream = None
         self.cipher_text = None
+        self.text_in_base64 = None
 
     def encrypt(self):
         # Verificar se a chave é menor ou igual a 128 bits (128/8)
         super().check_key_size(self.key)
+
+        self.key = super().convert_string_in_ascii(self.key)
 
         # Inicializando o vetor S e T
         self.S, self.T = super().initial_S_T_vector(self.key)
@@ -160,21 +177,27 @@ class RC4Encrypt(RC4):
         self.cipher_text = super().XOR(self.text_in_asc, self.key_stream)
 
         ## Convertendo o texto cifrado em ascii para char
-        self.cipher_text = super().encrypt_ascii(self.cipher_text)
+        self.cipher_text_user = super().convert_ascii_in_string(self.cipher_text)
+
+        ## Codificando em hexadecimal
+        self.text_in_base64 = super().b64e(self.cipher_text_user)
+
+
+        ### Manipulando arquivo
 
         ## Criação de arquivo com o texto cifrado
-        super().cria_arquivo_texto_cifrado(self.cipher_text)
+        super().cria_arquivo_texto_cifrado(self.text_in_base64)
 
         ## Ler arquivo e retorna o texto cifrado
         self.cipher_text = super().ler_arquivo_texto_cifrado()
 
-        # return self.cipher_text
-        print(f"Texto cifrado: {self.cipher_text}")
+        # print(self.text_in_base64)
+        return self.text_in_base64
 
 
 class RC4Decrypt(RC4):
     def __init__(self, text, key):
-        self.cipher_text = text
+        self.cipher_text = super().b64d(text)
         self.key = key
         self.S = None
         self.T = None
@@ -185,12 +208,15 @@ class RC4Decrypt(RC4):
         # Verificar se a chave é menor ou igual a 128 bits (128/8)
         super().check_key_size(self.key)
 
+        self.key = super().convert_string_in_ascii(self.key)
+
         # Inicializando o vetor S e T
         self.S, self.T = super().initial_S_T_vector(self.key)
 
         # Conversão do texto simples ou chave em ASCII
         self.text_in_asc = super().convert_string_in_ascii(self.cipher_text)
 
+        #print(self.text_in_asc)
         ## Algoritmo KSA
         self.S = super().KSA(self.S, self.T)
 
@@ -201,16 +227,47 @@ class RC4Decrypt(RC4):
         self.texto_simples= super().XOR(self.text_in_asc, self.key_stream)
 
         ## Convertendo o texto decifrado em ascii para char
-        self.texto_simples = super().encrypt_ascii(self.texto_simples)
+        self.texto_simples = super().convert_ascii_in_string(self.texto_simples)
 
-        # return texto_simples
-        print(f"Texto decifrado: {self.texto_simples}")
-
-
+        return self.texto_simples
+        # print(f"Texto decifrado: {self.texto_simples}")
 
 
-rc4 = RC4Encrypt('Seguranca', '11')
-rc4.encrypt()
+def main():
+    while(True):
 
-rc4_1 = RC4Decrypt('_\x05}·\x1fö)\x89\x13', '11')
-rc4_1.decrypt()
+        print("====== RC4 ======")
+        print("Opcoes: ")
+        print("\tE - Encriptar")
+        print("\tD - Decriptar")
+        print("\tS - Sair")
+
+        case = input("Digite a opcao desejada: ")
+
+        if(case=='E'):
+            ## ENCRYPT
+            plain_text = input("\nInforme o texto a ser encriptado: ")
+            key = input("\nInforme a chave para o processo de encriptacao: ")
+            rc4 = RC4Encrypt(plain_text, key)
+            chipher_text = rc4.encrypt()
+
+            print(f"\nTexto Encriptado: {chipher_text}\n\n")
+
+        elif(case=='D'):
+            try:
+                cipher_text = input("\nInforme o texto a ser decriptado: ")
+                key = input("\nInforme a chave para o processo de decriptacao: ")
+                rc4_1 = RC4Decrypt(cipher_text, key)
+                plain_text = rc4_1.decrypt()
+
+                print(f"\nTexto Decriptado: {plain_text}\n\n")
+            except:
+                print("Não é possível decriptar a mensagem - Formato incorreto")
+        elif(case == 'S'):
+            break
+        else:
+            print("Comando inválido. Tente novamente\n\n")
+
+
+if __name__ == "__main__":
+    main()
