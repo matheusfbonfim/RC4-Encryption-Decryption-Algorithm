@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c25594a5-1ca8-40b6-9e05-f89ccdc2efc4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RC4.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/RC4.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/text_cipher.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/text_cipher.txt" afterDir="false" />
-    </list>
+    <list default="true" id="c25594a5-1ca8-40b6-9e05-f89ccdc2efc4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

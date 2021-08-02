@@ -68,16 +68,6 @@ class Tela:
                 print(plain_text, end='')
 
 
-
-# rc4 = RC4Encrypt('Matheus', 'Rebeca')
-# cipher_text = rc4.encrypt()
-# print(cipher_text)
-#
-# rc4 = RC4Decrypt('\x8fªÞ{V\x16m', 'Rebeca')
-# plain_text = rc4.decrypt()
-# print(plain_text)
-
-
 tela = Tela()
 tela.Iniciar()
 
