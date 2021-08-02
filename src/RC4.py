@@ -8,8 +8,8 @@ class RC4:
     # Verificar se a chave é menor ou igual a 128 bits (128/8)
     def check_key_size(self, key):
         if (len(key) > 16):
-            print("O comprimento da chave não pode ser superior a 128 bits")
-            exit()
+            print("\n !! O comprimento da chave não pode ser superior a 128 bits !!")
+            raise
 
     # ------------------------------------
     # Encode - String para Hexa
@@ -182,7 +182,6 @@ class RC4Encrypt(RC4):
         ## Codificando em hexadecimal
         self.text_in_base64 = super().b64e(self.cipher_text_user)
 
-
         ### Manipulando arquivo
 
         ## Criação de arquivo com o texto cifrado
@@ -202,6 +201,7 @@ class RC4Decrypt(RC4):
         self.S = None
         self.T = None
         self.text_in_asc = None
+        self.key_stream = None
         self.texto_simples = None
 
     def decrypt(self):
@@ -235,23 +235,27 @@ class RC4Decrypt(RC4):
 
 def main():
     while(True):
-
+        print("=================")
         print("====== RC4 ======")
+        print("=================\n")
         print("Opcoes: ")
         print("\tE - Encriptar")
         print("\tD - Decriptar")
-        print("\tS - Sair")
+        print("\tS - Sair\n")
 
         case = input("Digite a opcao desejada: ")
 
         if(case=='E'):
-            ## ENCRYPT
-            plain_text = input("\nInforme o texto a ser encriptado: ")
-            key = input("\nInforme a chave para o processo de encriptacao: ")
-            rc4 = RC4Encrypt(plain_text, key)
-            chipher_text = rc4.encrypt()
+            try:
+                ## ENCRYPT
+                plain_text = input("\nInforme o texto a ser encriptado: ")
+                key = input("\nInforme a chave para o processo de encriptacao: ")
+                rc4 = RC4Encrypt(plain_text, key)
+                chipher_text = rc4.encrypt()
 
-            print(f"\nTexto Encriptado: {chipher_text}\n\n")
+                print(f"\nTexto Encriptado: {chipher_text}\n\n")
+            except:
+                print("!! Tente novamente !!\n ")
 
         elif(case=='D'):
             try:
@@ -262,11 +266,14 @@ def main():
 
                 print(f"\nTexto Decriptado: {plain_text}\n\n")
             except:
-                print("Não é possível decriptar a mensagem - Formato incorreto")
+                print("\nNão é possível decriptar a mensagem - Formato incorreto")
+                print("!! Tente novamente !!\n")
+
         elif(case == 'S'):
             break
+
         else:
-            print("Comando inválido. Tente novamente\n\n")
+            print("\n!! Comando inválido. Tente novamente !!\n\n")
 
 
 if __name__ == "__main__":
